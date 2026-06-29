@@ -1,20 +1,20 @@
 // Initialize Lucide Icons
 lucide.createIcons();
 
-// --- Data Matrix: Vowels & Articulation Mapping ---
+// --- Optimized Data Matrix: Expanded Match Arrays & Cleaned Metadata ---
 const vowelsData = [
-    { id: 'v1',  char: 'அ', phonetic: 'A',  articulation: 'throat' },
-    { id: 'v2',  char: 'ஆ', phonetic: 'AA', articulation: 'throat' },
-    { id: 'v3',  char: 'இ', phonetic: 'I',  articulation: 'palate' },
-    { id: 'v4',  char: 'ஈ', phonetic: 'II', articulation: 'palate' },
-    { id: 'v5',  char: 'உ', phonetic: 'U',  articulation: 'lips' },
-    { id: 'v6',  char: 'ஊ', phonetic: 'UU', articulation: 'lips' },
-    { id: 'v7',  char: 'எ', phonetic: 'E',  articulation: 'mid-palate' },
-    { id: 'v8',  char: 'ஏ', phonetic: 'EE', articulation: 'mid-palate' },
-    { id: 'v9',  char: 'ஐ', phonetic: 'AI', articulation: 'palate-teeth' },
-    { id: 'v10', char: 'ஒ', phonetic: 'O',  articulation: 'throat-lips' },
-    { id: 'v11', char: 'ஓ', phonetic: 'OO', articulation: 'throat-lips' },
-    { id: 'v12', char: 'ஔ', phonetic: 'AU', articulation: 'throat-lips' }
+    { id: 'v1',  char: 'அ', phonetic: 'A',  matches: ['அ', 'அ', 'a', 'ah', 'uh'] },
+    { id: 'v2',  char: 'ஆ', phonetic: 'AA', matches: ['ஆ', 'aa', 'aah', 'ha'] },
+    { id: 'v3',  char: 'இ', phonetic: 'I',  matches: ['இ', 'i', 'ee', 'e'] },
+    { id: 'v4',  char: 'ஈ', phonetic: 'II', matches: ['ஈ', 'ii', 'eee', 'yi'] },
+    { id: 'v5',  char: 'உ', phonetic: 'U',  matches: ['உ', 'u', 'oo', 'ou'] },
+    { id: 'v6',  char: 'ஊ', phonetic: 'UU', matches: ['ஊ', 'uu', 'ooo'] },
+    { id: 'v7',  char: 'எ', phonetic: 'E',  matches: ['எ', 'e', 'eh'] },
+    { id: 'v8',  char: 'ஏ', phonetic: 'EE', matches: ['ஏ', 'ee', 'ay', 'ae'] },
+    { id: 'v9',  char: 'ஐ', phonetic: 'AI', matches: ['ஐ', 'ai', 'i', 'vibe'] }, // 'vibe' or 'ai' can trigger on partials
+    { id: 'v10', char: 'ஒ', phonetic: 'O',  matches: ['ஒ', 'o', 'oh'] },
+    { id: 'v11', char: 'ஓ', phonetic: 'OO', matches: ['ஓ', 'oo', 'ooh'] },
+    { id: 'v12', char: 'ஔ', phonetic: 'AU', matches: ['ஔ', 'au', 'ow', 'av'] }
 ];
 
 // --- DOM Elements ---
@@ -22,14 +22,13 @@ const gridContainer = document.getElementById('vowel-grid');
 const micBtn = document.getElementById('mic-btn');
 const micStatus = document.getElementById('mic-status');
 const saraswathiCard = document.getElementById('saraswathi-card');
-const articulationDisplay = document.getElementById('articulation-display');
 
 // --- State Variables ---
 let isListening = false;
 let recognition = null;
 let activeTimeout = null;
 
-// --- Initialize Grid UI ---
+// --- Initialize Grid UI (Cleaned: Removed Articulation text) ---
 function renderGrid() {
     gridContainer.innerHTML = '';
     vowelsData.forEach(vowel => {
@@ -44,7 +43,6 @@ function renderGrid() {
         card.innerHTML = `
             <span class="vowel-char mb-2">${vowel.char}</span>
             <span class="text-amber-400/80 font-mono text-sm tracking-widest">${vowel.phonetic}</span>
-            <span class="text-[10px] text-amber-100/40 uppercase mt-2 hidden md:block">${vowel.articulation}</span>
         `;
         
         gridContainer.appendChild(card);
@@ -53,27 +51,17 @@ function renderGrid() {
 
 // --- Visual Effect: The Glow Sequence ---
 function triggerGlow(vowelObj) {
-    // Clear previous timeouts to prevent overlapping glitches
     if (activeTimeout) clearTimeout(activeTimeout);
 
-    // Remove existing glows
     document.querySelectorAll('.glow-active').forEach(el => el.classList.remove('glow-active'));
 
-    // Apply glow to matched card and Goddess illustration
     const targetCard = document.getElementById(vowelObj.id);
     if (targetCard) targetCard.classList.add('glow-active');
     saraswathiCard.classList.add('glow-active');
 
-    // Update articulation text
-    articulationDisplay.textContent = vowelObj.articulation;
-    articulationDisplay.classList.add('text-amber-400');
-
-    // Hold the illumination for 1.5 seconds
     activeTimeout = setTimeout(() => {
         if (targetCard) targetCard.classList.remove('glow-active');
         saraswathiCard.classList.remove('glow-active');
-        articulationDisplay.textContent = '-';
-        articulationDisplay.classList.remove('text-amber-400');
     }, 1500);
 }
 
@@ -84,14 +72,13 @@ function setupSpeechRecognition() {
     if (!SpeechRecognition) {
         micStatus.textContent = "Browser not supported";
         micBtn.disabled = true;
-        micBtn.classList.add('opacity-50', 'cursor-not-allowed');
         return;
     }
 
     recognition = new SpeechRecognition();
-    recognition.lang = 'ta-IN';
+    recognition.lang = 'ta-IN'; 
     recognition.continuous = true;
-    recognition.interimResults = true; // Allows catching partials quickly
+    recognition.interimResults = true; 
 
     recognition.onstart = () => {
         isListening = true;
@@ -100,13 +87,13 @@ function setupSpeechRecognition() {
     };
 
     recognition.onresult = (event) => {
-        // Look through the results of the current transcript
         for (let i = event.resultIndex; i < event.results.length; i++) {
-            const transcript = event.results[i][0].transcript.trim().replace(/\s/g, '');
+            const transcript = event.results[i][0].transcript.trim().toLowerCase();
             
-            // Check if transcript contains any of our target vowels
-            // Often, single phonemes might come alongside noise. We loop to find the match.
-            const matchedVowel = vowelsData.find(v => transcript.includes(v.char));
+            // Flexible matching against both Tamil and English phonetic representations
+            const matchedVowel = vowelsData.find(vowel => 
+                vowel.matches.some(match => transcript.includes(match))
+            );
             
             if (matchedVowel) {
                 triggerGlow(matchedVowel);
@@ -116,31 +103,21 @@ function setupSpeechRecognition() {
 
     recognition.onerror = (event) => {
         console.error("Speech Recognition Error: ", event.error);
-        stopListening();
+        if (event.error === 'not-allowed') stopListening();
     };
 
     recognition.onend = () => {
-        // If it stops but we still want it to listen, auto-restart
         if (isListening) {
-            try {
-                recognition.start();
-            } catch (e) {
-                stopListening();
-            }
+            try { recognition.start(); } catch (e) { stopListening(); }
         } else {
             stopListening();
         }
     };
 }
 
-// --- Mic Button Toggles ---
 function startListening() {
     if (!recognition) return;
-    try {
-        recognition.start();
-    } catch (e) {
-        console.log("Already started.");
-    }
+    try { recognition.start(); } catch (e) {}
 }
 
 function stopListening() {
@@ -150,42 +127,9 @@ function stopListening() {
     micStatus.textContent = "Tap to start";
 }
 
-// --- Event Listeners ---
 micBtn.addEventListener('click', () => {
-    if (isListening) {
-        stopListening();
-    } else {
-        startListening();
-    }
+    if (isListening) { stopListening(); } else { startListening(); }
 });
 
-// --- Bootstrapper ---
 renderGrid();
 setupSpeechRecognition();
-
-/* ====================================================================
-TensorFlow.js Speech Commands Fallback Architecture (For Reference)
-====================================================================
-To use TFJS for non-English offline phoneme spotting:
-1. Train a model at https://teachablemachine.withgoogle.com/train/audio
-2. Upload the files (model.json, metadata.json, weights.bin)
-3. Implement the logic below:
-
-async function initTFJSModel() {
-    const URL = "path/to/your/custom/model/";
-    const recognizer = speechCommands.create(
-        "BROWSER_FFT", null, URL + "model.json", URL + "metadata.json"
-    );
-    
-    await recognizer.ensureModelLoaded();
-    const classLabels = recognizer.wordLabels(); 
-    
-    recognizer.listen(result => {
-        const scores = result.scores;
-        // Find highest score, match to classLabels, and trigger triggerGlow(vowelObj)
-    }, {
-        probabilityThreshold: 0.75
-    });
-}
-====================================================================
-*/
