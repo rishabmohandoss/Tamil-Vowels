@@ -3,11 +3,9 @@
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* The Glow Sequence Animation 
-  Added dynamically via JS when a vowel is matched 
-*/
+/* The Glow Sequence Animation */
 .glow-active {
-    box-shadow: 0 0 35px rgba(251, 191, 36, 0.85);
+    box-shadow: 0 0 40px rgba(251, 191, 36, 0.9);
     border-color: #fcd34d !important;
     transform: scale(1.05);
     background-color: #4a2a18;
@@ -23,22 +21,30 @@
     text-shadow: 0 2px 10px rgba(251, 191, 36, 0.2);
 }
 
-/* Microphone breathing animation 
-  Active when the Web Speech API is listening
-*/
+/* Floating Letter Animation Classes */
+.floating-letter {
+    position: fixed;
+    font-size: 5rem;
+    font-weight: bold;
+    color: #fcd34d;
+    text-shadow: 0 0 20px rgba(251, 191, 36, 1);
+    z-index: 50;
+    pointer-events: none;
+    transition: all 0.7s cubic-bezier(0.25, 1, 0.5, 1);
+    transform: translate(-50%, -50%) scale(0.5);
+    opacity: 0;
+}
+
+.floating-letter-active {
+    transform: translate(-50%, -50%) scale(1.2);
+    opacity: 1;
+}
+
+/* Microphone breathing animation */
 @keyframes breathe {
-    0% {
-        box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.4);
-        transform: scale(1);
-    }
-    50% {
-        box-shadow: 0 0 0 15px rgba(251, 191, 36, 0);
-        transform: scale(1.05);
-    }
-    100% {
-        box-shadow: 0 0 0 0 rgba(251, 191, 36, 0);
-        transform: scale(1);
-    }
+    0% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.4); transform: scale(1); }
+    50% { box-shadow: 0 0 0 15px rgba(251, 191, 36, 0); transform: scale(1.05); }
+    100% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0); transform: scale(1); }
 }
 
 .mic-listening {
@@ -47,6 +53,4 @@
     border-color: #fbbf24 !important;
 }
 
-.mic-listening i {
-    color: #fff !important;
-}
+.mic-listening i { color: #fff !important; }
